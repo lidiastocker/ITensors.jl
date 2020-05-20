@@ -1,27 +1,28 @@
 using ITensors,
       Test
-import ITensors.SmallString
+
+import ITensors: nactive
 
 @testset "QN" begin
 
   @testset "QNVal Basics" begin
-    qv = QNVal()
+    qv = ITensors.QNVal()
     @test !isactive(qv)
 
-    qv = QNVal("Sz",0)
-    @test name(qv) == SmallString("Sz")
+    qv = ITensors.QNVal("Sz",0)
+    @test ITensors.name(qv) == ITensors.SmallString("Sz")
     @test val(qv) == 0
     @test modulus(qv) == 1
     @test isactive(qv)
 
-    qv = QNVal("A",1,2)
-    @test name(qv) == SmallString("A")
+    qv = ITensors.QNVal("A",1,2)
+    @test ITensors.name(qv) == ITensors.SmallString("A")
     @test val(qv) == 1
     @test modulus(qv) == 2
     @test !isfermionic(qv)
 
-    qv = QNVal("Nf",1,-1)
-    @test name(qv) == SmallString("Nf")
+    qv = ITensors.QNVal("Nf",1,-1)
+    @test ITensors.name(qv) == ITensors.SmallString("Nf")
     @test val(qv) == 1
     @test modulus(qv) == -1
     @test isfermionic(qv)
@@ -46,6 +47,7 @@ import ITensors.SmallString
     @test isactive(q[1])
     @test val(q,"P") == 1
     @test modulus(q,"P") == 2
+    @test nactive(q) == 1
 
     q = QN(("A",1),("B",2))
     @test isactive(q[1])
@@ -58,6 +60,14 @@ import ITensors.SmallString
     q = QN(("B",2),("A",1))
     @test val(q,"A") == 1
     @test val(q,"B") == 2
+    @test nactive(q) == 2
+
+    q = QN(("A",1),("B",2),("C",3),("D",4))
+    @test nactive(q) == 4
+
+    @test_throws BoundsError begin
+      q = QN(("A",1),("B",2),("C",3),("D",4),("E",5))
+    end
   end
 
   @testset "Comparison" begin
@@ -80,6 +90,12 @@ import ITensors.SmallString
 
     @test QN("P",0,2) + QN("P",1,2) == QN("P",1,2)
     @test QN("P",1,2) + QN("P",1,2) == QN("P",0,2)
+
+    # Arithmetic involving mixed-label QNs
+    @test QN()-QN("Sz",2) == QN("Sz",-2)
+    @test QN("Sz",2)-QN() == QN("Sz",2)
+    @test QN()-QN(("Sz",2),("N",1)) == QN(("Sz",-2),("N",-1))
+    @test QN("N",1)-QN("Sz",2) == QN(("N",1),("Sz",-2))
   end
 
   @testset "Ordering" begin
@@ -102,8 +118,8 @@ import ITensors.SmallString
     @test !(z < qe)
     @test (qe < z)
 
-    @test (qa > qb)
-    @test !(qb > qa)
+    @test !(qa > qb)
+    @test qb > qa
     @test !(qb == qa)
     @test (qb < qc)
     @test !(qc < qb)
@@ -113,4 +129,12 @@ import ITensors.SmallString
     @test !(qd < qc)
   end
 
+  @testset "Hashing" begin
+    @test hash(QN(("Sz",0))) == hash(QN())
+    @test hash(QN("Sz",0)) == hash(QN("N",0))
+    @test hash(QN(("Sz",1),("N",2))) == hash(QN(("N",2),("Sz",1)))
+  end
+
 end
+
+nothing

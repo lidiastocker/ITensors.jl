@@ -2,28 +2,23 @@ using ITensors,
       Test
 
 import ITensors.SmallString, 
-       ITensors.IntChar, 
-       ITensors.isint
+       ITensors.Tag,
+       ITensors.isint,
+       ITensors.isnull,
+       ITensors.IntChar
 
 @testset "SmallString" begin
   @testset "ctors" begin
       s = SmallString()
-      @test ITensors.isnull(s)
+      @test isnull(s)
   end
 
   @testset "setindex" begin
       s = SmallString()
-      @test ITensors.isnull(s)
+      @test isnull(s)
       t = setindex(s, IntChar(1), 1)
-      @test !ITensors.isnull(t)
+      @test !isnull(t)
   end
-
-  #@testset "push" begin
-  #  s = SmallString()
-  #  @test ITensors.isnull(s)
-  #  t = push(s, IntChar(1))
-  #  @test !ITensors.isnull(t)
-  #end
 
   @testset "comparison" begin
       u = SmallString("1")
@@ -33,15 +28,19 @@ import ITensors.SmallString,
       @test u < t
   end
 
-  #@testset "Convert to String" begin
-  #  s = SmallString("abc")
-  #  @test typeof(s) == SmallString
+  @testset "Convert to String" begin
+    s = SmallString("abc")
+    @test typeof(s) == SmallString
 
-  #  sg = String(s)
-  #  for n=1:length(sg)
-  #    @test sg[n] == convert(Char,s[n])
-  #  end
-  #end
+    sg = String(s)
+    for n=1:length(sg)
+      @test sg[n] == convert(Char,s[n])
+    end
+
+    s = SmallString("")
+    sg = String(s)
+    @test sg == ""
+  end
 
   @testset "isint" begin
     i = SmallString("123")
@@ -78,3 +77,4 @@ import ITensors.SmallString,
 
 end
 
+nothing
